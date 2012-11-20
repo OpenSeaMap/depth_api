@@ -1,0 +1,11 @@
+def configure(ctx):
+    ctx.find_program('asciidoc', var='ASCIIDOC')
+
+
+def build(ctx):
+    ctx(
+        rule   = '${ASCIIDOC} -a toc -a max-width=55em -o ${TGT} ${SRC}',
+        source = 'api1.txt',
+        target = 'api1.html'
+    )
+    ctx.install_as('${PREFIX}/public/api1/index.html', 'api1.html')

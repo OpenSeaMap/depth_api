@@ -1,0 +1,430 @@
+OpenSeaMap API version 1
+========================
+author <dfa@bezono.org>
+v1.0, 2012-11-22
+
+
+
+General
+-------
+
+This interface provides different services. Most services are only
+accessible with a valid authentication.
+
+
+
+Installation
+------------
+
+CherryPy
+~~~~~~~~
+
+To run the interface, CherryPy in version 3.2.2 or higher is required.
+
+If there is a lower version available in the package system of your
+operating system, the required version can be installed manually:
+
+--------------------------------------------------------------------------------
+wget http://download.cherrypy.org/cherrypy/3.2.2/CherryPy-3.2.2.tar.gz
+tar xfz CherryPy-3.2.2.tar.gz
+cd CherryPy-3.2.2
+python setup.py install
+--------------------------------------------------------------------------------
+
+
+Install Interface
+~~~~~~~~~~~~~~~~~
+
+It is recommended to create and use a separate user/group for this
+interface.
+
+--------------------------------------------------------------------------------
+tar xfvz openseamap-api-1.0.tar.gz
+chown osm:osm openseamap-api-1.0
+cd openseamap-api-1.0
+cp site.conf.sample site.conf
+mkdir log
+mkdir uploads
+--------------------------------------------------------------------------------
+
+
+Start Interface
+~~~~~~~~~~~~~~~
+
+The interface can be started on the shell. +cherryd+ has several start
+parameters (e.g. deamonize).
+
+--------------------------------------------------------------------------------
+su - osm
+cd /path/to/openseamap-api-1
+cherryd -c site.conf -i openseamap
+--------------------------------------------------------------------------------
+
+
+
+Interface Procedure Calls
+-------------------------
+
+Authentication
+~~~~~~~~~~~~~~
+
+OpenSeaMap provides an own user database. To create an account, login, logout
+or change the password, the 'auth' services can be used.
+
+Message Format
+~~~~~~~~~~~~~~
+
+From client to service, data has to transferred like a normal browser form
+POST request:
+
++Content-Type: application/x-www-form-urlencoded; charset=UTF-8+
+
+The service generally responses in JSON format. There are some exceptions like
+image or file transfers. If the operation was successful, the service responses
+with a HTML status code '200'.
+
+If an exception occures, the service responses with a HTML status code '409'.
+The message returned is in JSON format and contains a 'code' and 'msg' field.
+
+
+
+Auth (+/api1/auth+)
+-------------------
+
+According to the principle of data avoidance and data economy, the password
+(already hashed on client side) will be stored salted and rehashed. Even the
+username will be stored as a hash. This protects the username (email address)
+from beeing read on an intrusion.
+
+
+captcha
+~~~~~~~
+
+Returns a captcha (150x50 px, JPEG). The last requested captcha in the
+actual session is valid for account creation.
+
+URI::
++
+    /api1/auth/captcha
++
+
+Parameters::
++
+    (none)
++
+
+Return Value::
++
+    Image (JPEG)
++
+
+Exceptions::
++
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl 'http://localhost:8080/api1/auth/captcha'
+--------------------------------------------------------------------------------
+
+
+create
+~~~~~~
+
+Creates a new account. The password has to be hashed (sha1) before submitting
+it to the service. We won't know it.
+
+URI::
++
+    /api1/auth/create
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Parameters::
++
+    username - String
+    password - String (hashed with sha1)
+    captcha  - String
++
+
+Return Value::
++
+    (none, only status 200)
++
+
+Exceptions::
++
+    103 - Username already exists.
+    801 - Invalid captcha.
+    802 - Invalid password hash (sha1).
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<sessionid>' \
+    -d 'username=<new-username>&password=<new-password>&captcha=<captcha>' \
+    'http://localhost:8080/api1/auth/create'
+--------------------------------------------------------------------------------
+
+
+login
+~~~~~
+
+Authenticates user account for the actual session. After three unsuccessful
+attempts, the account will be blocked for the next three minutes.
+
+URI::
++
+    /api1/auth/login
++
+
+Parameters::
++
+    username - String
+    password - String
++
+
+Return Value::
++
+    session_id - String
++
+
+Exceptions::
++
+    101 - Username or password wrong.
+    102 - Account temporarily blocked.
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -d 'username=<username>&password=<password>' \
+    'http://localhost:8080/api1/auth/login'
+--------------------------------------------------------------------------------
+
+
+logout
+~~~~~~
+
+Clears actual session.
+
+URI::
++
+    /api1/auth/logout
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Return Value::
++
+    (none, only status 200)
++
+
+Exceptions::
++
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' \
+    'http://localhost:8080/api1/auth/logout'
+--------------------------------------------------------------------------------
+
+
+changepassword
+~~~~~~~~~~~~~~
+
+Changes the password for an account. The password has to be hashed (sha1) before
+submitting it to the service. We won't know it.
+
+URI::
++
+    /api1/auth/changepassword
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Parameters::
++
+    old - String (hashed with sha1)
+    new - String (hashed with sha1)
++
+
+Return Value::
++
+    (none, only status 200)
++
+
+Exceptions::
++
+    101 - Username or password wrong.
+    802 - Invalid password hash (sha1).
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<sessionid>' \
+    -d 'old=<old-password>&new=<new-password>' \
+    'http://localhost:8080/api1/auth/changepassword'
+--------------------------------------------------------------------------------
+
+
+
+
+Track (+/api1/track+)
+---------------------
+
+newid
+~~~~~
+
+URI::
++
+    /api1/track/newid
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Return Value::
++
+    trackId - Integer
++
+
+Exceptions::
++
+    201 - Unable to fetch new track id.
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' \
+    'http://localhost:8080/api1/track/newid'
+--------------------------------------------------------------------------------
+
+
+upload
+~~~~~~
+
+URI::
++
+    /api1/track/upload
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Header::
++
+    X-Track-Id - Integer
++
+
+Parameter::
++
+    track - File (multipart/form-data)
++
+
+Return Value::
++
+    length  - Integer (bytes)
++
+
+Exceptions::
++
+    202 - Invalid track id.
+    203 - Upload already done.
+    803 - Header X-Track-Id not set.
+    804 - Missing field name 'track'.
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' -H 'X-Track-Id:<track-id>' \
+    -F 'track=@<track-file>'  'http://localhost:8080/api1/track/upload'
+--------------------------------------------------------------------------------
+
+
+status
+~~~~~~
+
+URI::
++
+    /api1/track/status
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Header::
++
+    X-Track-Id - Integer
++
+
+Return Value::
++
+    sizeExpected - Integer (bytes) / null, when not started or done
+    sizeUploaded - Integer (bytes) / null, when not started or done
++
+
+Exceptions::
++
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' -H 'X-Track-Id:123' \
+    'http://localhost:8080/api1/track/status'
+--------------------------------------------------------------------------------
+
+
+getall
+~~~~~~
+
+URI::
++
+    /api1/track/getall
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Return Value::
++
+    data - Array of records. A record is an array with three items (track_id,
+           file_ref, upload_state)
++
+
+Exceptions::
++
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' \
+    'http://localhost:8080/api1/track/getall'
+--------------------------------------------------------------------------------

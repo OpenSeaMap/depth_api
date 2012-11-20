@@ -1,0 +1,38 @@
+[global]
+
+# server
+server.bind_addr : ('0.0.0.0', 8080)
+
+# database
+db.host     : '127.0.0.1'
+db.port     : '5432'
+db.name     : ''
+db.user     : ''
+db.password : ''
+
+# cors
+cors.origin : 'http://<domain>'
+
+# track
+track.dir : 'uploads'
+
+# log
+#
+# levels:
+#      0 = NOTSET
+#     10 = DEBUG
+#     20 = INFO
+#     30 = WARNING
+#     40 = ERROR
+#     50 = CRITICAL
+log.level       : 20
+log.screen      : False
+log.access_file : 'log/access.log'
+log.error_file  : 'log/error.log'
+
+
+[/]
+tools.sessions.on         : True
+tools.sessions.timeout    : 60
+tools.sessions.persistent : False
+tools.sessions.locking    : 'explicit'
