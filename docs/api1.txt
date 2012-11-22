@@ -48,6 +48,19 @@ mkdir uploads
 --------------------------------------------------------------------------------
 
 
+Database Settings
+~~~~~~~~~~~~~~~~~
+
+The only database supported is PostgreSQL. Create an empty database and change
+the database settings in +site.conf+. There is an install script to setup the
+database structure.
+
+--------------------------------------------------------------------------------
+cd openseamap-api-1.0
+psql -U <username> -d <dbname> -f install/install.sql
+--------------------------------------------------------------------------------
+
+
 Start Interface
 ~~~~~~~~~~~~~~~
 
