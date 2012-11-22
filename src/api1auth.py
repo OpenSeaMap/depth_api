@@ -87,6 +87,8 @@ class Api1Auth():
         self._auth.create(username, password)
         cherrypy.session.acquire_lock()
         cherrypy.session.pop('captcha', None)
+        cherrypy.session['authenticated'] = True
+        cherrypy.session['username']      = username
         cherrypy.session.release_lock()
 
         return {}
