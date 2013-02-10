@@ -57,7 +57,7 @@ class Auth():
         Authenticates user account. The account will be blocked for '_blockForMinutes' if the
         maximum attempts '_maxUnsuccessfulAttempts' is reached.
         '''
-        username = self._hashUsername(username)
+        username = self.hashUsername(username)
         self._cur.execute(
             '''
             SELECT password, salt, attempts, last_attempt
@@ -89,7 +89,7 @@ class Auth():
     # ----------------------------------------------------------------------------------------------
 
     def create(self, username, password):
-        username = self._hashUsername(username)
+        username = self.hashUsername(username)
         self._cur.execute(
             '''
             SELECT count(*)
@@ -116,7 +116,7 @@ class Auth():
     # ----------------------------------------------------------------------------------------------
 
     def changePassword(self, username, oldPassword, newPassword):
-        username = self._hashUsername(username)
+        username = self.hashUsername(username)
         self._cur.execute(
             '''
             SELECT password, salt
@@ -138,7 +138,7 @@ class Auth():
 
     # ----------------------------------------------------------------------------------------------
 
-    def _hashUsername(self, username):
+    def hashUsername(self, username):
         h = hashlib.sha1(username)
         return h.hexdigest()
 
