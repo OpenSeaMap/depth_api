@@ -49,4 +49,4 @@ class Api1():
 
     @cherrypy.expose
     def index(self):
-        return 'OpenSeaMap API v1.0'
+        return 'OpenSeaMap API v1.1'

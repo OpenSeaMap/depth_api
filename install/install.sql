@@ -26,7 +26,7 @@ ALTER TABLE user_profiles
 ----------------------------------------------------------------------------------------------------
 
 CREATE TABLE user_tracks (
-    track_id integer NOT NULL,
+    track_id bigint NOT NULL,
     user_name varchar(40) NOT NULL,
     file_ref varchar(255),
     upload_state smallint DEFAULT 0
