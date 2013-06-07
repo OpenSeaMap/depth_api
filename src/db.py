@@ -21,6 +21,7 @@
 
 import cherrypy
 import psycopg2
+import psycopg2.extras
 
 
 # --------------------------------------------------------------------------------------------------
@@ -55,6 +56,7 @@ class Db:
         connStr    = 'host=%s port=%s dbname=%s user=%s password=%s' % \
                      (dbHost, dbPort, dbName, dbUser, dbPassword)
         self.conn = psycopg2.connect(connStr)
+        psycopg2.extras.register_hstore(self.conn)
 
     # ----------------------------------------------------------------------------------------------
 

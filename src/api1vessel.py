@@ -27,29 +27,59 @@ import cherrypy
 # Imports internal
 # --------------------------------------------------------------------------------------------------
 
-from api1auth import *
-from api1track import *
-from api1vessel import *
-from db import *
+from vessel import *
 
 
 # --------------------------------------------------------------------------------------------------
 
-class Api1():
+class Api1Vessel():
     '''
-    Provides the root for API version 1.
+    Provides vessel management methods.
     '''
 
     # ----------------------------------------------------------------------------------------------
 
-    def __init__(self):
-        self._db    = Db()
-        self.auth   = Api1Auth(self._db)
-        self.track  = Api1Track(self._db)
-        self.vessel = Api1Vessel(self._db)
+    def __init__(self, db):
+        self._vessel = Vessel(db)
 
     # ----------------------------------------------------------------------------------------------
 
     @cherrypy.expose
-    def index(self):
-        return 'OpenSeaMap API v1.2'
+    @cherrypy.tools.cors()
+    @cherrypy.tools.protect()
+    @cherrypy.tools.json_out()
+    def create(self, name):
+        vesselId = self._vessel.create(cherrypy.session.get('username', None), name)
+        result = {
+            'vesselId' : vesselId
+        }
+        return result
+
+    # ----------------------------------------------------------------------------------------------
+
+    @cherrypy.expose
+    @cherrypy.tools.cors()
+    @cherrypy.tools.protect()
+    @cherrypy.tools.json_out()
+    def set(self, *args, **kwargs):
+        vesselId = kwargs.get('vesselId', None)
+        if vesselId == None:
+            raise Error(805, 'Missing field name \'vesselId\'.', 'VESSEL')
+        del kwargs['vesselId']
+        self._vessel.setParams(cherrypy.session.get('username', None), vesselId, kwargs)
+        result = {
+            'success' : True
+        }
+        return result
+
+    # ----------------------------------------------------------------------------------------------
+
+    @cherrypy.expose
+    @cherrypy.tools.cors()
+    @cherrypy.tools.protect()
+    @cherrypy.tools.json_out()
+    def getall(self):
+        result = {
+            'data' : self._vessel.getByUsername(cherrypy.session.get('username', None))
+        }
+        return result

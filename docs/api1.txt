@@ -1,7 +1,7 @@
 OpenSeaMap API version 1
 ========================
 author <dfa@bezono.org>
-v1.0, 2012-11-22
+v1.2, 2013-06-06
 
 
 
@@ -440,4 +440,124 @@ Example::
 --------------------------------------------------------------------------------
 curl -b 'session_id=<session-id>' \
     'http://localhost:8080/api1/track/getall'
+--------------------------------------------------------------------------------
+
+
+
+
+Vessel (+/api1/vessel+)
+-----------------------
+
+create
+~~~~~~
+
+Create a new vessel.
+
+URI::
++
+    /api1/vessel/create
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Parameter::
++
+    name - Vessels name
++
+
+Return Value::
++
+    vesselId - Integer
++
+
+Exceptions::
++
+    204 - Vessel name already exists.
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' -d 'name=<vessel-name>' \
+    'http://localhost:8080/api1/vessel/create'
+--------------------------------------------------------------------------------
+
+
+set
+~~~
+
+Change vessel settings.
+
+URI::
++
+    /api1/vessel/set
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Parameter::
++
+    vesselId       - Vessel id
+    name           - Vessel name             (optional, string, 1,  50)
+    description    - Description             (optional, string, 1, 500)
++
+
+Return Value::
++
+    success - Boolean
++
+
+Exceptions::
++
+    204 - Vessel name already exists.
+    205 - Invalid param {param}.
+    206 - Invalid param format '{param}'.
+    207 - Invalid vessel ID.
+    805 - Missing field name 'vesselId'.
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' -d 'vesselId=<vessel-id>&description=...' \
+    'http://localhost:8080/api1/vessel/set'
+--------------------------------------------------------------------------------
+
+
+getall
+~~~~~~
+
+Get all vessels for the authenticated user, incuding their settings.
+
+URI::
++
+    /api1/vessel/getall
++
+
+Session-Cookie::
++
+    session_id - String
++
+
+Return Value::
++
+    data - Array of records. Each record represents a vessel including its
+           settings.
++
+
+Exceptions::
++
+    999 - An error occured.
++
+
+Example::
+--------------------------------------------------------------------------------
+curl -b 'session_id=<session-id>' \
+    'http://localhost:8080/api1/vessel/getall'
 --------------------------------------------------------------------------------
